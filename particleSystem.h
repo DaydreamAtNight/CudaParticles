@@ -85,6 +85,11 @@ class ParticleSystem
             m_params.gravity = make_float3(0.0f, x, 0.0f);
         }
 
+        void setGravity3d(float x, float y, float z)
+        {
+            m_params.gravity = make_float3(x, y, z);
+        }
+
         void setCollideSpring(float x)
         {
             m_params.spring = x;

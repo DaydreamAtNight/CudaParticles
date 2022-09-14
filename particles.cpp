@@ -37,6 +37,7 @@
 #include "particleSystem.h"
 #include "render_particles.h"
 #include "paramgl.h"
+#include "vectorRotate.hpp"
 
 #define MAX_EPSILON_ERROR 5.00f
 #define THRESHOLD         0.30f
@@ -62,6 +63,8 @@ bool bPause = false;
 bool displaySliders = false;
 bool wireframe = false;
 bool demoMode = false;
+bool reverseGravity = false;
+bool rotateGravity = false;
 int idleCounter = 0;
 int demoCounter = 0;
 const int idleDelay = 2000;
@@ -75,7 +78,9 @@ int numIterations = 0; // run until exit
 // simulation parameters
 float timestep = 0.5f;
 float damping = 1.0f;
-float gravity = 0.0003f;
+// float gravity = 0.0003f;
+float gravityOrg[] = {0, -0.001, 0};
+float gravity3d[] = {0, -0.001, 0};
 int iterations = 1;
 int ballr = 10;
 
@@ -230,7 +235,8 @@ void display()
     {
         psystem->setIterations(iterations);
         psystem->setDamping(damping);
-        psystem->setGravity(-gravity);
+        // psystem->setGravity(-gravity);
+        psystem->setGravity3d(gravity3d[0], gravity3d[1], gravity3d[2]);
         psystem->setCollideSpring(collideSpring);
         psystem->setCollideDamping(collideDamping);
         psystem->setCollideShear(collideShear);
@@ -260,6 +266,36 @@ void display()
     glTranslatef(camera_trans_lag[0], camera_trans_lag[1], camera_trans_lag[2]);
     glRotatef(camera_rot_lag[0], 1.0, 0.0, 0.0);
     glRotatef(camera_rot_lag[1], 0.0, 1.0, 0.0);
+
+    if (reverseGravity)
+    {
+        // reverse gravity if camera upward
+        // std::cout  << abs((int)camera_rot_lag[0])%360 << " " << camera_rot_lag[1] << std::endl;
+        if (abs((int)camera_rot_lag[0])%360 > 120 &&  abs((int)camera_rot_lag[0])%360 < 240)
+            gravity3d[1] = -gravityOrg[1];
+        else 
+            gravity3d[1] = gravityOrg[1];
+    }
+
+    if (rotateGravity)
+    {
+        // rotate gravity if camera rotate
+        // std::cout  << abs((int)camera_rot_lag[0])%360 << " " << camera_rot_lag[1] << std::endl;
+        float angleX = -M_PI*camera_rot_lag[0]/180.0;
+        float angleY = -M_PI*camera_rot_lag[1]/180.0;
+        float temp[3] = {0,0,0};
+        rotateVectorX(gravityOrg, temp, angleX);
+        gravity3d[1] = 0.0;
+        rotateVectorY(temp, gravity3d, angleY);
+
+        // // print point data
+        // printf("%.2f %.2f\t",camera_rot_lag[0], camera_rot_lag[1]);
+        // for (int i=0; i<3; i++)
+        // {
+        //     printf("%.2f ",1000*gravity3d[i]);
+        // }
+        // printf("\t%.2f\n",1000*sqrt(gravity3d[0]*gravity3d[0]+gravity3d[1]*gravity3d[1]+gravity3d[2]*gravity3d[2]));
+    }
 
     glGetFloatv(GL_MODELVIEW_MATRIX, modelView);
 
@@ -576,6 +612,14 @@ void key(unsigned char key, int /*x*/, int /*y*/)
         case 'h':
             displaySliders = !displaySliders;
             break;
+
+        case 'g':
+            reverseGravity = !reverseGravity;
+            break;       
+
+        case 'f':
+            rotateGravity = !rotateGravity;
+            break;
     }
 
     demoMode = false;
@@ -623,7 +667,10 @@ void initParams()
     {
         timestep = 0.0f;
         damping = 0.0f;
-        gravity = 0.0f;
+        // gravity = 0.0f;
+        gravity3d[0] = 0.0f;
+        gravity3d[1] = 0.0f;
+        gravity3d[2] = 0.0f;
         ballr = 1;
         collideSpring = 0.0f;
         collideDamping = 0.0f;
@@ -636,7 +683,7 @@ void initParams()
         params = new ParamListGL("misc");
         params->AddParam(new Param<float>("time step", timestep, 0.0f, 1.0f, 0.01f, &timestep));
         params->AddParam(new Param<float>("damping"  , damping , 0.0f, 1.0f, 0.001f, &damping));
-        params->AddParam(new Param<float>("gravity"  , gravity , 0.0f, 0.001f, 0.0001f, &gravity));
+        // params->AddParam(new Param<float>("gravity"  , gravity , 0.0f, 0.001f, 0.0001f, &gravity));
         params->AddParam(new Param<int> ("ball radius", ballr , 1, 20, 1, &ballr));
 
         params->AddParam(new Param<float>("collide spring" , collideSpring , 0.0f, 1.0f, 0.001f, &collideSpring));
@@ -663,6 +710,7 @@ void initMenus()
     glutAddMenuEntry("Toggle animation [ ]", ' ');
     glutAddMenuEntry("Step animation [ret]", 13);
     glutAddMenuEntry("Toggle sliders [h]", 'h');
+    glutAddMenuEntry("Toggle active gravity (f)", 'f');
     glutAddMenuEntry("Quit (esc)", '\033');
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
