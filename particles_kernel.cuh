@@ -18,6 +18,8 @@ typedef unsigned int uint;
 // simulation parameters
 struct SimParams
 {
+    bool rigidBottom;
+    
     float3 colliderPos;
     float  colliderRadius;
 

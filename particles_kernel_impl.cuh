@@ -28,7 +28,6 @@ namespace cg = cooperative_groups;
 // simulation parameters in constant memory
 __constant__ SimParams params;
 
-
 struct integrate_functor
 {
     float deltaTime;
@@ -86,10 +85,23 @@ struct integrate_functor
 
 #endif
 
-        if (pos.y < -1.0f + params.particleRadius)
+        if (params.rigidBottom)
         {
+            if (pos.y < -1.0f + params.particleRadius)
+            {
             pos.y = -1.0f + params.particleRadius;
             vel.y *= params.boundaryDamping;
+            }
+        }
+        else
+        {
+            if (pos.y < -1.0f + params.particleRadius)
+            {
+                pos.y = 1.0f - params.particleRadius;
+                // vel.x *=0;
+                // vel.y *=0;
+                // vel.z *=0;
+            }
         }
 
         // store new position and velocity

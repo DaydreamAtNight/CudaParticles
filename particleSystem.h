@@ -23,7 +23,7 @@
 class ParticleSystem
 {
     public:
-        ParticleSystem(uint numParticles, uint3 gridSize, bool bUseOpenGL);
+        ParticleSystem(uint numParticles, uint3 gridSize, bool bUseOpenGL, bool rigidBottom);
         ~ParticleSystem();
 
         enum ParticleConfig
@@ -80,6 +80,7 @@ class ParticleSystem
         {
             m_params.globalDamping = x;
         }
+        
         void setGravity(float x)
         {
             m_params.gravity = make_float3(0.0f, x, 0.0f);
@@ -188,6 +189,7 @@ class ParticleSystem
         SimParams m_params;
         uint3 m_gridSize;
         uint m_numGridCells;
+        bool m_rigidBottom;
 
         StopWatchInterface *m_timer;
 

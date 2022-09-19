@@ -33,8 +33,9 @@
 #define CUDART_PI_F         3.141592654f
 #endif
 
-ParticleSystem::ParticleSystem(uint numParticles, uint3 gridSize, bool bUseOpenGL) :
+ParticleSystem::ParticleSystem(uint numParticles, uint3 gridSize, bool bUseOpenGL, bool rigidBottom) :
     m_bInitialized(false),
+    m_rigidBottom(rigidBottom),
     m_bUseOpenGL(bUseOpenGL),
     m_numParticles(numParticles),
     m_hPos(0),
@@ -51,6 +52,8 @@ ParticleSystem::ParticleSystem(uint numParticles, uint3 gridSize, bool bUseOpenG
     m_gridSortBits = 18;    // increase this for larger grids
 
     // set simulation parameters
+    m_params.rigidBottom = m_rigidBottom;
+
     m_params.gridSize = m_gridSize;
     m_params.numCells = m_numGridCells;
     m_params.numBodies = m_numParticles;

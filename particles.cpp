@@ -65,6 +65,7 @@ bool wireframe = false;
 bool demoMode = false;
 bool reverseGravity = false;
 bool rotateGravity = false;
+bool rigidBottom = true;
 int idleCounter = 0;
 int demoCounter = 0;
 const int idleDelay = 2000;
@@ -117,7 +118,7 @@ extern "C" void copyArrayFromDevice(void *host, const void *device, unsigned int
 // initialize particle system
 void initParticleSystem(int numParticles, uint3 gridSize, bool bUseOpenGL)
 {
-    psystem = new ParticleSystem(numParticles, gridSize, bUseOpenGL);
+    psystem = new ParticleSystem(numParticles, gridSize, bUseOpenGL, rigidBottom);
     psystem->reset(ParticleSystem::CONFIG_GRID);
 
     if (bUseOpenGL)
@@ -681,6 +682,8 @@ void initParams()
     {
         // create a new parameter list
         params = new ParamListGL("misc");
+        params->AddParam(new Param<bool>("rigid bottom", rigidBottom, 0, 1, 1, &rigidBottom));
+
         params->AddParam(new Param<float>("time step", timestep, 0.0f, 1.0f, 0.01f, &timestep));
         params->AddParam(new Param<float>("damping"  , damping , 0.0f, 1.0f, 0.001f, &damping));
         // params->AddParam(new Param<float>("gravity"  , gravity , 0.0f, 0.001f, 0.0001f, &gravity));
